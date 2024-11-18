@@ -1,49 +1,38 @@
 import requests
 import pytest
 
-Token = "0c433c5ee3cd92367729a5c068a118a2"
-Url = "https://pokemonbattle.ru/"
-
-# регистрация тренера
-def test_reg_trainer():
-
-    response_trainer_reg = requests.post (f"{Url}trainers/reg", json= {
-    "trainer_token": Token,
-    "email": "gol8an@yandex.ru",
-    "password": "Goon2024"
-})
-    print(response_trainer_reg.text)
-
-# активация тренера
-def test_activate_trainer():
-
-    response_confirm_email = requests.post (f"{Url}trainers/confirm_email", json= {
-    "trainer_token": Token
-})
-    print(response_confirm_email.text)
+token = "0c433c5ee3cd92367729a5c068a118a2"
+url = "https://api.pokemonbattle.ru/v2/"
+HEADER = {"Content-Type" : "application/json", "trainer_token" : token}
 
 # создание покемона
-def test_create_pokemone():
+def test_create_pokemon():
 
-    response_add_pokemon = requests.post (f"{Url}pokemons", headers = {"trainer_token": Token}, json= {
-    "name": "Пуля",
-    "photo": "https://dolnikov.ru/pokemons/albums/027.png"
+    response_add_pokemon = requests.post (f"{url}pokemons", headers = HEADER, json= {
+    "name": "Pokemm",
+    "photo_id": -1
 })
-    print(response_add_pokemon.text)
+    assert response_add_pokemon.status_code == 201
+    print(f'Статус код: {response_add_pokemon.status_code}. Сообщение: {response_add_pokemon.json()["message"]}')
 
 # переименование покемона? смена картинки
-def test_rename_pokemone():
+def test_rename_pokemon():
+    response_add_pokemon = requests.post(f"{url}pokemons", headers=HEADER, json={
+        "name": "newpokemon",
+        "photo_id": -1
+    })
+    pokemon_id = response_add_pokemon.json()["id"]
 
-    response_rename_pokemon = requests.put (f"{Url}pokemons", headers = {"trainer_token": Token}, json= {
-    "pokemon_id": "126895",
-    "name": "ariados",
-    "photo": "https://dolnikov.ru/pokemons/albums/013.png"
+    response_rename_pokemon = requests.put (f"{url}pokemons", headers = {"trainer_token": token}, json= {
+    "pokemon_id": pokemon_id,
+    "name": "renamepokemon",
+    "photo_id": 2
 })
-    print(response_rename_pokemon.text)
+    print(f'Статус код: {response_rename_pokemon.status_code}. Сообщение: {response_rename_pokemon.json()["message"]}')
 
 # ловля покемона
-def test_get_pokemone():
-    response_catch_pokemon = requests.post (f"{Url}trainers/add_pokeball", headers = {"trainer_token": Token}, json= {
-    "pokemon_id": "8855",
+def test_get_pokemon(token_poc="0c433c5ee3cd92367729a5c068a118a2"):
+    response_catch_pokemon = requests.post (f"{url}trainers/add_pokeball", headers = {"trainer_token": token_poc}, json= {
+    "pokemon_id": "137926",
 })
-    print(response_catch_pokemon.text)
+    print(f'Статус код: {response_catch_pokemon.status_code}. Сообщение: {response_catch_pokemon.json()["message"]}')
